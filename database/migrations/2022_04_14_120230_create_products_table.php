@@ -18,7 +18,7 @@ return new class extends Migration
             $table->integer('amount_available');
             $table->integer('cost');
             $table->string('product_name');
-            $table->foreign('seller_id')
+            $table->foreignId('seller_id')
                 ->references('id')
                 ->on('users')
                 ->cascadeOnDelete();
