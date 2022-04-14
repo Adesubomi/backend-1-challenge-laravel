@@ -20,4 +20,6 @@ Route::middleware(['auth:sanctum'])->group( function () {
     Route::get('users/{user}', [UserController::class, 'show'])->name('users.show');
     Route::patch('users', [UserController::class, 'update'])->name('users.update');
     Route::delete('users', [UserController::class, 'update'])->name('users.delete');
+    Route::get('profile', [UserController::class, 'profile'])->name('profile');
+
 });
