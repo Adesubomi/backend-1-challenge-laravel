@@ -84,6 +84,32 @@ class UserFeaturesTest extends TestCase
     /**
      * @test
      */
+    public function user_can_update_his_account(): void
+    {
+        $user = User::factory()->create();
+        $data_for_update = User::factory()->make();
+
+        $endpoint = route('api.users.update');
+        Sanctum::actingAs($user);
+        $response = $this->patchJson($endpoint, $data_for_update->only(['name', 'role']));
+        $response->assertSuccessful();
+        $response->assertJsonStructure([
+            'message', 'data'
+        ]);
+
+        $this->assertDatabaseHas(
+            (new User)->getTable(),
+            [
+                "id" => $user->id,
+                "name" => $data_for_update->name,
+                "role" => $data_for_update->role,
+            ]
+        );
+    }
+
+    /**
+     * @test
+     */
     public function user_can_delete_his_account(): void
     {
         $user = User::factory()->create();

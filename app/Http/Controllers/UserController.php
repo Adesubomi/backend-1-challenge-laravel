@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UserStoreRequest;
+use App\Http\Requests\UserUpdateRequest;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -41,6 +42,19 @@ class UserController extends Controller
         return response()->success(
             "User Information",
             $user
+        );
+    }
+
+    /**
+     * Update User
+     */
+    public function update(UserUpdateRequest $request):JsonResponse
+    {
+        $user = Auth::user();
+        $user->updateUser($request->validated());
+
+        return response()->success(
+            "User updated"
         );
     }
 

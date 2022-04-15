@@ -20,6 +20,11 @@ class User extends Authenticatable
         'role',
     ];
 
+    protected array $editable = [
+        'name',
+        'role',
+    ];
+
     protected $hidden = [
         'password',
         'remember_token',
@@ -35,5 +40,13 @@ class User extends Authenticatable
         return User::create(
             $this->filterFillableAttributes($data)
         );
+    }
+
+    public function updateUser(array $data)
+    {
+        return User::where('email', $this->email)
+            ->update(
+                $this->filterEditableAttributes($data)
+            );
     }
 }
