@@ -18,8 +18,10 @@ class UserController extends Controller
         $new_user = $user->newUser($request->validated());
 
         return response()->created(
-            "User created successfully",
-            $new_user
+            message: "User created successfully",
+            data: [
+                "user" => $new_user,
+            ],
         );
     }
 
@@ -29,8 +31,10 @@ class UserController extends Controller
     public function profile(): JsonResponse
     {
         return response()->success(
-            "User Profile",
-            Auth::user()
+            message: "User Profile",
+            data: [
+                "user" => Auth::user(),
+            ],
         );
     }
 
@@ -40,8 +44,10 @@ class UserController extends Controller
     public function show(User $user): JsonResponse
     {
         return response()->success(
-            "User Information",
-            $user
+            message: "User Information",
+            data: [
+                "user" => $user,
+            ],
         );
     }
 
@@ -54,7 +60,7 @@ class UserController extends Controller
         $user->updateUser($request->validated());
 
         return response()->success(
-            "User updated"
+            message: "User updated",
         );
     }
 
@@ -67,7 +73,7 @@ class UserController extends Controller
         $user->delete();
 
         return response()->success(
-            "User deleted"
+            message: "User deleted",
         );
     }
 }
