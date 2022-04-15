@@ -13,10 +13,9 @@ class UserFeaturesTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * @return void
      * @test
      */
-    public function can_create_account(): void
+    public function user_can_create_account(): void
     {
         $sample_user = User::factory()->make();
 
@@ -42,7 +41,7 @@ class UserFeaturesTest extends TestCase
     /**
      * @test
      */
-    public function can_view_user_information(): void
+    public function user_can_view_another_user_information(): void
     {
         $user = User::factory()->create();
         $second_party_user = User::factory()->create();
@@ -64,7 +63,7 @@ class UserFeaturesTest extends TestCase
     /**
      * @test
      */
-    public function can_view_user_own_profile(): void
+    public function user_can_view_own_profile(): void
     {
         $user = User::factory()->create();
 
@@ -79,6 +78,29 @@ class UserFeaturesTest extends TestCase
         // confirm the user whose info is returned
         $response->assertJsonFragment(
             $user->only(['email', 'role'])
+        );
+    }
+
+    /**
+     * @test
+     */
+    public function user_can_delete_his_account(): void
+    {
+        $user = User::factory()->create();
+
+        $endpoint = route('api.users.delete');
+        Sanctum::actingAs($user);
+        $response = $this->deleteJson($endpoint);
+        $response->assertSuccessful();
+        $response->assertJsonStructure([
+            'message', 'data'
+        ]);
+
+        $this->assertDatabaseMissing(
+            (new User)->getTable(),
+            [
+                "email" => $user->email,
+            ]
         );
     }
 }

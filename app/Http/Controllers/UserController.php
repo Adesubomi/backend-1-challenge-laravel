@@ -43,4 +43,17 @@ class UserController extends Controller
             $user
         );
     }
+
+    /**
+     * Delete User
+     */
+    public function delete():JsonResponse
+    {
+        $user = Auth::user();
+        $user->delete();
+
+        return response()->success(
+            "User deleted"
+        );
+    }
 }
