@@ -12,16 +12,11 @@ class UserUpdateRequest extends FormRequest
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
-    public function rules()
+    public function rules(): array
     {
         return [
-            'name' => 'required',
-            'role' => ['required',],
+            'name' => 'sometimes',
+            'role' => ['sometimes',],
         ];
     }
 }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -21,4 +22,8 @@ Route::middleware(['auth:sanctum'])->group( function () {
     Route::patch('users', [UserController::class, 'update'])->name('users.update');
     Route::delete('users', [UserController::class, 'delete'])->name('users.delete');
     Route::get('profile', [UserController::class, 'profile'])->name('profile');
+    Route::get('users/products', [ProductController::class, 'myProducts'])->name('users.products');
+
+    Route::resource('products', ProductController::class)
+        ->only(['index', 'show', 'store', 'update', 'delete']);
 });
