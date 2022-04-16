@@ -71,4 +71,26 @@ class ProductFeaturesTest extends TestCase
         $response = self::getJson($endpoint);
         $response->assertForbidden();
     }
+
+    /**
+     * @test
+     */
+    public function user_can_view_the_details_of_a_product(): void
+    {
+        $user = User::factory()->create();
+
+        $product = Product::factory()->create();
+        $endpoint = route("api.products.show", ['product' => $product->id]);
+
+        Sanctum::actingAs($user);
+        $response = self::getJson($endpoint);
+        $response->assertSuccessful();
+        $response->assertJsonStructure([
+            'message', 'data' => [
+                'product'
+            ]
+        ]);
+
+        $response->assertJsonFragment($product->only('product_name'));
+    }
 }
