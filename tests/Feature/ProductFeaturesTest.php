@@ -6,7 +6,6 @@ use App\Enums\Role;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -192,7 +191,6 @@ class ProductFeaturesTest extends TestCase
         );
     }
 
-
     /**
      * @test
      */
@@ -227,5 +225,48 @@ class ProductFeaturesTest extends TestCase
             (new Product())->getTable(),
             $product->only(['id', 'amount_available', 'cost', 'product_name'])
         );
+    }
+
+    /**
+     * @test
+     */
+    public function seller_can_delete_a_product(): void
+    {
+        $product = Product::factory()->create();
+        $user = $product->seller;
+
+        $endpoint = route("api.products.destroy", ["product" => $product->id]);
+
+        Sanctum::actingAs($user);
+        $response = self::deleteJson($endpoint);
+        $response->assertSuccessful();
+        $response->assertJsonStructure([
+            'message', 'data'
+        ]);
+
+        $this->assertDatabaseMissing(
+            (new Product())->getTable(),
+            $product->only(['id'])
+        );
+    }
+
+    /**
+     * @test
+     */
+    public function seller_can_ONLY_delete_his_product(): void
+    {
+        $product = Product::factory()->create();
+        $imposter_user = User::factory()->role(Role::Seller)->create();
+
+        $endpoint = route("api.products.destroy", ["product" => $product->id]);
+
+        Sanctum::actingAs($imposter_user);
+        $response = self::deleteJson($endpoint);
+        $response->assertForbidden();
+        $this->assertDatabaseHas(
+            (new Product())->getTable(),
+            $product->only(['id'])
+        );
+
     }
 }

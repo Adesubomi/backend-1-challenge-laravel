@@ -25,5 +25,5 @@ Route::middleware(['auth:sanctum'])->group( function () {
     Route::get('profile', [UserController::class, 'profile'])->name('profile');
 
     Route::resource('products', ProductController::class)
-        ->only(['index', 'show', 'store', 'update', 'delete']);
+        ->only(['index', 'show', 'store', 'update', 'destroy']);
 });
