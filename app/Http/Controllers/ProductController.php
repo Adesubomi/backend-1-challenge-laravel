@@ -88,11 +88,19 @@ class ProductController extends Controller
     {
         $this->authorize("update", $product);
 
-        $product = $product->updateProduct($request->validated());
+        $is_updated = $product->updateProduct($request->validated());
+
+        if (!$is_updated) {
+            return response()->failed(
+                message: "Unable to update product information",
+                data: [],
+            );
+        }
+
         return response()->success(
             message: "Product has been updated",
             data: [
-                "product" => $product
+                "product" => $product->refresh()
             ],
         );
     }

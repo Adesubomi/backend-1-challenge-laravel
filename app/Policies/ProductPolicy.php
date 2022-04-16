@@ -32,6 +32,13 @@ class ProductPolicy
 
     public function update(User $user, Product $product): Response
     {
+        if (!Role::Seller->match($user->role, true)) {
+            return $this->deny();
+        }
+        if ($product->seller_id !== $user->id) {
+            return $this->deny();
+        }
+
         return $this->allow();
     }
 

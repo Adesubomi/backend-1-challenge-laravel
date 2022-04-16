@@ -147,4 +147,85 @@ class ProductFeaturesTest extends TestCase
             $product->only(['amount_available', 'cost', 'product_name'])
         );
     }
+
+    /**
+     * @test
+     */
+    public function seller_can_update_a_product_details(): void
+    {
+        $product = Product::factory()->create();
+        $product_info_for_update = Product::factory()->make();
+        $user = $product->seller;
+
+        $endpoint = route("api.products.update", ["product" => $product->id]);
+
+        Sanctum::actingAs($user);
+        $response = self::putJson(
+            $endpoint,
+            $product_info_for_update->only(['amount_available', 'cost', 'product_name'])
+        );
+        $response->assertSuccessful();
+        $response->assertJsonStructure([
+            'message', 'data' => [
+                'product'
+            ]
+        ]);
+
+        $response->assertJsonFragment(
+            $product_info_for_update->only([
+                'amount_available',
+                'cost',
+                'product_name'
+            ])
+        );
+
+        $this->assertDatabaseHas(
+            (new Product())->getTable(),
+            [
+                "id" => $product->id,
+                ...$product_info_for_update->only([
+                    'amount_available',
+                    'cost',
+                    'product_name'
+                ])
+            ]
+        );
+    }
+
+
+    /**
+     * @test
+     */
+    public function seller_can_ONLY_update_his_product_details(): void
+    {
+        $product = Product::factory()->create();
+        $product_info_for_update = Product::factory()->make();
+        $imposter_seller = User::factory()->role(Role::Seller)->create();
+
+        $endpoint = route("api.products.update", ["product" => $product->id]);
+
+        Sanctum::actingAs($imposter_seller);
+        $response = self::putJson(
+            $endpoint,
+            $product_info_for_update->only(['amount_available', 'cost', 'product_name'])
+        );
+        $response->assertForbidden();
+
+        $this->assertDatabaseMissing(
+            (new Product())->getTable(),
+            [
+                "id" => $product->id,
+                ...$product_info_for_update->only([
+                    'amount_available',
+                    'cost',
+                    'product_name'
+                ])
+            ]
+        );
+
+        $this->assertDatabaseHas(
+            (new Product())->getTable(),
+            $product->only(['id', 'amount_available', 'cost', 'product_name'])
+        );
+    }
 }

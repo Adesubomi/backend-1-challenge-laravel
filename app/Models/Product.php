@@ -33,4 +33,9 @@ class Product extends Model
             ]
         );
     }
+
+    public function updateProduct(array $data): bool
+    {
+        return $this->update($this->filterEditableAttributes($data));
+    }
 }
