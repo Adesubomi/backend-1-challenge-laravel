@@ -2,11 +2,13 @@
 
 namespace Database\Factories;
 
+use App\Enums\Role;
+use App\Models\Product;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Product>
+ * @extends Factory
  */
 class ProductFactory extends Factory
 {
@@ -15,8 +17,8 @@ class ProductFactory extends Factory
         return [
             'amount_available' => 0,
             'cost' => rand(1, 20) * 5,
-            'product_name' => $this->faker->firstName() .' '. $this->faker->country(),
-            'seller_id' => User::factory()->create()->id,
+            'product_name' => $this->faker->firstName() . ' ' . $this->faker->country(),
+            'seller_id' => User::factory()->role(Role::Seller)->create()->id,
         ];
     }
 

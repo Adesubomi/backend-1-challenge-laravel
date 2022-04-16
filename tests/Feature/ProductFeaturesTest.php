@@ -93,4 +93,58 @@ class ProductFeaturesTest extends TestCase
 
         $response->assertJsonFragment($product->only('product_name'));
     }
+
+    /**
+     * @test
+     */
+    public function only_sellers_can_create_a_new_product(): void
+    {
+        $product = Product::factory()->make();
+        $user = User::factory()->role(Role::Buyer)->create();
+
+        $endpoint = route("api.products.store");
+
+        Sanctum::actingAs($user);
+        $response = self::postJson(
+            $endpoint,
+            $product->only(['amount_available', 'cost', 'product_name'])
+        );
+        $response->assertForbidden();
+
+        $this->assertDatabaseMissing(
+            (new Product())->getTable(),
+            $product->only(['amount_available', 'cost', 'product_name'])
+        );
+    }
+
+    /**
+     * @test
+     */
+    public function seller_can_create_a_new_product(): void
+    {
+        $product = Product::factory()->make();
+        $user = $product->seller;
+
+        $endpoint = route("api.products.store");
+
+        Sanctum::actingAs($user);
+        $response = self::postJson(
+            $endpoint,
+            $product->only(['amount_available', 'cost', 'product_name'])
+        );
+        $response->assertSuccessful();
+        $response->assertJsonStructure([
+            'message', 'data' => [
+                'product'
+            ]
+        ]);
+        $response->assertJsonFragment(
+            $product->only(['amount_available', 'cost', 'product_name'])
+        );
+
+        $this->assertDatabaseHas(
+            (new Product())->getTable(),
+            $product->only(['amount_available', 'cost', 'product_name'])
+        );
+    }
 }

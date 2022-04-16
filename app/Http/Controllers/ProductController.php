@@ -69,10 +69,9 @@ class ProductController extends Controller
     {
         $this->authorize("create", Product::class);
 
-        $new_product = $product->newProduct(
-            Auth::user(),
-            $request->validated()
-        );
+        /** @var User $user */
+        $user = Auth::user();
+        $new_product = $product->newProduct($user, $request->validated());
 
         return response()->success(
             message: "Product has been created",
