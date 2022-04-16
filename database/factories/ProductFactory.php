@@ -10,11 +10,6 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class ProductFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [
@@ -23,5 +18,12 @@ class ProductFactory extends Factory
             'product_name' => $this->faker->firstName() .' '. $this->faker->country(),
             'seller_id' => User::factory()->create()->id,
         ];
+    }
+
+    public function forUser(User $user): ProductFactory
+    {
+        return $this->state([
+            'seller_id' => $user->id,
+        ]);
     }
 }

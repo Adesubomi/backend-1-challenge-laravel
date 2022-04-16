@@ -33,7 +33,7 @@ class ProductController extends Controller
      */
     public function myProducts(): JsonResponse
     {
-        $this->authorize("store", Product::class);
+        $this->authorize("create", Product::class);
 
         /** @var User $user */
         $user = Auth::user();

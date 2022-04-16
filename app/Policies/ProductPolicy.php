@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\Role;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -23,6 +24,9 @@ class ProductPolicy
 
     public function create(User $user): Response
     {
+        if (!Role::Seller->match($user->role, true)) {
+            return $this->deny();
+        }
         return $this->allow();
     }
 
