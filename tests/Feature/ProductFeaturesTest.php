@@ -13,7 +13,6 @@ use Tests\TestCase;
 class ProductFeaturesTest extends TestCase
 {
     use RefreshDatabase;
-
     /**
      * @test
      */
@@ -69,7 +68,7 @@ class ProductFeaturesTest extends TestCase
         $endpoint = route("api.users.products");
 
         Sanctum::actingAs($user);
-        Ò     $response = self::getJson($endpoint);
+        $response = self::getJson($endpoint);
         $response->assertForbidden();
     }
 }
