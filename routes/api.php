@@ -26,6 +26,7 @@ Route::middleware(['auth:sanctum'])->group( function () {
     Route::put('deposit', [UserController::class, 'deposit'])->name('deposit');
     Route::put('reset', [UserController::class, 'reset'])->name('reset');
 
+    Route::post('buy', [ProductController::class, 'buy'])->name('buy');
     Route::resource('products', ProductController::class)
         ->only(['index', 'show', 'store', 'update', 'destroy']);
 });

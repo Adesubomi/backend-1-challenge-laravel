@@ -56,11 +56,29 @@ class ProductPolicy
 
     public function restore(User $user, Product $product): Response
     {
-        return $this->allow();
+        return $this->deny();
     }
 
     public function forceDelete(User $user, Product $product): Response
     {
+        return $this->deny();
+    }
+
+    public function buy(User $user, Product $product, int $amount): Response
+    {
+        if (!Role::Buyer->match($user->role)) {
+            return $this->deny();
+        }
+
+        $total_spend = $product->cost * $amount;
+        if ($user->deposit < $total_spend) {
+            return $this->deny("You do not have enough deposit to buy this product");
+        }
+
+        if ($product->amount_available < $amount) {
+            return $this->deny("Product not available. Only {$product->amount_available} left in stock. ");
+        }
+
         return $this->allow();
     }
 }

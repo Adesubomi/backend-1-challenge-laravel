@@ -28,4 +28,11 @@ class ProductFactory extends Factory
             'seller_id' => $user->id,
         ]);
     }
+
+    public function amountAvailable(int $amount): ProductFactory
+    {
+        return $this->state([
+            'amount_available' => $amount,
+        ]);
+    }
 }

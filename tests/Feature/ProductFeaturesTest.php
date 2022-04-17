@@ -267,6 +267,149 @@ class ProductFeaturesTest extends TestCase
             (new Product())->getTable(),
             $product->only(['id'])
         );
+    }
 
+    /**
+     * @test
+     */
+    public function buyer_can_buy_a_product(): void
+    {
+        $product = Product::factory()->amountAvailable(200)->create();
+        $user = User::factory()->role(Role::Buyer)->fund(1_000_000)->create();
+        $current_balance = $user->deposit;
+
+        $endpoint = route("api.buy");
+
+        Sanctum::actingAs($user);
+        $response = self::postJson($endpoint, [
+            'product_id' => $product->id,
+            'amount' => 2
+        ]);
+
+        $response->assertSuccessful();
+        $response->assertJsonStructure([
+            'message', 'data' => [
+                "product", "total_spent", "change", "total_change"
+            ]
+        ]);
+
+        // Check that amount_available has reduced by the amount bought
+        $this->assertDatabaseHas(
+            (new Product())->getTable(),
+            [
+                'id' => $product->id,
+                'amount_available' => $product->amount_available - 2,
+            ]
+        );
+
+        // Check that the buyer_s balance has reduced
+        $this->assertDatabaseHas(
+            (new User)->getTable(),
+            [
+                'id' => $user->id,
+                'deposit' => $current_balance - (2*$product->cost),
+            ]
+        );
+    }
+
+    /**
+     * @test
+     */
+    public function only_buyer_can_buy_a_product(): void
+    {
+        $product = Product::factory()->amountAvailable(200)->create();
+        $product_current_amount = $product->amount_available;
+
+        $user = User::factory()->role(Role::Seller)->fund(1_000_000)->create();
+        $current_balance = $user->deposit;
+
+        $endpoint = route("api.buy");
+
+        Sanctum::actingAs($user);
+        $response = self::postJson($endpoint, [
+            'product_id' => $product->id,
+            'amount' => 2
+        ]);
+        $response->assertForbidden();
+
+        // checking to make sure the amount has not changed
+        $this->assertDatabaseHas(
+            (new Product)->getTable(),
+            ['amount_available' => $product_current_amount]
+        );
+
+        // check to make sure the buyer_s balance hasn_t changed
+        $this->assertDatabaseHas(
+            (new User)->getTable(),
+            ['deposit' => $current_balance]
+        );
+    }
+
+    /**
+     * @test
+     */
+    public function buyer_can_NOT_buy_a_product_when_his_balance_can_not_cover_the_cost(): void
+    {
+        $product = Product::factory()->amountAvailable(200)->create();
+        $product_current_amount = $product->amount_available;
+
+        $user = User::factory()->role(Role::Buyer)->fund(5)->create();
+        $current_balance = $user->deposit;
+
+        $endpoint = route("api.buy");
+
+        Sanctum::actingAs($user);
+        $response = self::postJson($endpoint, [
+            'product_id' => $product->id,
+            'amount' => 2
+        ]);
+
+        $response->assertForbidden();
+
+        // checking to make sure the amount has not changed
+        $this->assertDatabaseHas(
+            (new Product)->getTable(),
+            ['amount_available' => $product_current_amount]
+        );
+
+        // check to make sure the buyer_s balance hasn_t changed
+        $this->assertDatabaseHas(
+            (new User)->getTable(),
+            ['deposit' => $current_balance]
+        );
+    }
+
+    /**
+     * @test
+     */
+    public function buyer_can_NOT_buy_a_product_at_higher_amount_than_available_amount(): void
+    {
+        $product = Product::factory()->amountAvailable(1)->create();
+        $product_current_amount = $product->amount_available;
+
+        $user = User::factory()->role(Role::Buyer)->fund(1_000_000)->create();
+        $current_balance = $user->deposit;
+
+        $endpoint = route("api.buy");
+
+        Sanctum::actingAs($user);
+        $response = self::postJson($endpoint, [
+            'product_id' => $product->id,
+            'amount' => 2,
+        ]);
+
+        $response->assertForbidden();
+
+        // checking to make sure the amount has not changed
+        $this->assertDatabaseHas(
+            (new Product)->getTable(),
+            ['amount_available' => $product_current_amount]
+        );
+
+        // check to make sure the buyer_s balance hasn_t changed
+        $this->assertDatabaseHas(
+            (new User)->getTable(),
+            ['deposit' => $current_balance]
+        );
     }
 }

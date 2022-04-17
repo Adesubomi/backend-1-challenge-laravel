@@ -119,8 +119,32 @@ class ProductController extends Controller
         );
     }
 
-    public function buyProduct(ProductBuyRequest $request)
+    /**
+     * Buy product
+     * @throws AuthorizationException
+     */
+    public function buy(ProductBuyRequest $request)
     {
+        /** @var User $user */
+        $user = Auth::user();
+        /** @var Product $product */
+        $product = Product::findOrFail($request->input("product_id"));
+        $amount = $request->input('amount');
 
+        $this->authorize('buy', [$product, $amount]);
+
+        $total_spent = $product->buy($user, $amount);
+
+        $change = $user->refresh()->balanceAsChange();
+
+        return response()->success(
+            message: "Product has been bought",
+            data: [
+                "product" => $product,
+                "total_spent" => $total_spent,
+                "change" => $change,
+                "total_change" => array_sum($change),
+            ]
+        );
     }
 }

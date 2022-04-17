@@ -36,10 +36,22 @@ class User extends Authenticatable
         'role' => Role::class
     ];
 
-//    public function balance(): UserBalanceStatement
-//    {
-//
-//    }
+    public function balanceAsChange(): array
+    {
+        $change = [];
+        $amount_left = $this->deposit;
+        $denominations = Coin::values();
+        arsort($denominations);
+
+        foreach ($denominations as $denomination) {
+            while ($amount_left >= $denomination) {
+                $change[] = $denomination;
+                $amount_left -= $denomination;
+            }
+        }
+
+        return $change;
+    }
 
     public function newUser(array $data)
     {
