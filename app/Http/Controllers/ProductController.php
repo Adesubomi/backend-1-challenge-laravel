@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ProductBuyRequest;
 use App\Http\Requests\ProductStoreRequest;
 use App\Http\Requests\ProductUpdateRequest;
 use App\Models\Product;
@@ -116,5 +117,10 @@ class ProductController extends Controller
         return response()->success(
             message: "Product has been deleted",
         );
+    }
+
+    public function buyProduct(ProductBuyRequest $request)
+    {
+
     }
 }
