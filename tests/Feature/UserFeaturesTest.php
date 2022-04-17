@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Enums\Coin;
+use App\Enums\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -11,6 +13,7 @@ use Tests\TestCase;
 class UserFeaturesTest extends TestCase
 {
     use RefreshDatabase;
+    use WithFaker;
 
     /**
      * @test
@@ -128,5 +131,67 @@ class UserFeaturesTest extends TestCase
                 "email" => $user->email,
             ]
         );
+    }
+
+    /**
+     * @test
+     */
+    public function user_can_deposit_coin(): void
+    {
+        $user = User::factory()->role(Role::Buyer)->create();
+        $current_balance = $user->deposit;
+        $new_deposit_amount = $this->faker->randomElement(Coin::values());
+
+        $endpoint = route('api.deposit');
+        Sanctum::actingAs($user);
+        $response = $this->putJson($endpoint, [
+            'coin' => $new_deposit_amount
+        ]);
+        $response->assertSuccessful();
+        $response->assertJsonStructure([
+            'message', 'data'
+        ]);
+
+        $this->assertDatabaseHas(
+            (new User)->getTable(),
+            ["id" => $user->id, "deposit" => $new_deposit_amount + $current_balance]
+        );
+    }
+
+    /**
+     * @test
+     */
+    public function only_buyers_can_deposit_coin(): void
+    {
+        $user = User::factory()->role(Role::Seller)->create();
+        $current_balance = $user->deposit;
+        $new_deposit_amount = $this->faker->randomElement(Coin::values());
+
+        $endpoint = route('api.deposit');
+        Sanctum::actingAs($user);
+        $response = $this->putJson($endpoint, [
+            'coin' => $new_deposit_amount
+        ]);
+        $response->assertForbidden();
+
+        $this->assertDatabaseHas(
+            (new User)->getTable(),
+            ["id" => $user->id, "deposit" => $current_balance]
+        );
+    }
+
+    /**
+     * @test
+     */
+    public function can_only_deposit_supported_coins(): void
+    {
+        $user = User::factory()->role(Role::Seller)->create();
+
+        $endpoint = route('api.deposit');
+        Sanctum::actingAs($user);
+        $response = $this->putJson($endpoint, [
+            'coin' => 24
+        ]);
+        $response->assertJsonValidationErrors(['coin']);
     }
 }

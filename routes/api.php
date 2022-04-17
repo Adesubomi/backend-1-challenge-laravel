@@ -23,6 +23,7 @@ Route::middleware(['auth:sanctum'])->group( function () {
     Route::patch('users', [UserController::class, 'update'])->name('users.update');
     Route::delete('users', [UserController::class, 'delete'])->name('users.delete');
     Route::get('profile', [UserController::class, 'profile'])->name('profile');
+    Route::put('deposit', [UserController::class, 'deposit'])->name('deposit');
 
     Route::resource('products', ProductController::class)
         ->only(['index', 'show', 'store', 'update', 'destroy']);

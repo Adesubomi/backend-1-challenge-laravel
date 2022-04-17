@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Coin;
+use App\Http\Requests\DepositRequest;
 use App\Http\Requests\UserStoreRequest;
 use App\Http\Requests\UserUpdateRequest;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 class UserController extends Controller
 {
@@ -22,6 +25,35 @@ class UserController extends Controller
             data: [
                 "user" => $new_user,
             ],
+        );
+    }
+
+    /**
+     * Deposit coin to vending machine account
+     */
+    public function deposit(DepositRequest $request): JsonResponse
+    {
+        if (!Gate::allows('deposit')) {
+            return response()->failed(
+                message: "Only a buyer is allowed to deposit",
+                statusCode: 403,
+                data: [],
+            );
+        }
+
+        /** @var User $user */
+        $user = Auth::user();
+        $is_deposited = $user->depositCoin(Coin::from($request->validated('coin')));
+
+        if (!$is_deposited) {
+            return response()->failed(
+                "Unable to deposit coin",
+            );
+        }
+
+        return response()->success(
+            message: "Coin has been deposited",
+            data: []
         );
     }
 

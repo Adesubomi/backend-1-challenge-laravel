@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Coin;
 use App\Enums\Role;
 use App\Traits\ModelTraits;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -18,6 +19,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'deposit',
     ];
 
     protected array $editable = [
@@ -34,6 +36,11 @@ class User extends Authenticatable
         'role' => Role::class
     ];
 
+    public function balance(): UserBalanceStatement
+    {
+
+    }
+
     public function newUser(array $data)
     {
         return User::create(
@@ -47,5 +54,10 @@ class User extends Authenticatable
             ->update(
                 $this->filterEditableAttributes($data)
             );
+    }
+
+    public function depositCoin(Coin $coin): bool
+    {
+        return $this->increment('deposit', $coin->value);
     }
 }
