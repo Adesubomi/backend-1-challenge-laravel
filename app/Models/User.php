@@ -36,10 +36,10 @@ class User extends Authenticatable
         'role' => Role::class
     ];
 
-    public function balance(): UserBalanceStatement
-    {
-
-    }
+//    public function balance(): UserBalanceStatement
+//    {
+//
+//    }
 
     public function newUser(array $data)
     {
@@ -59,5 +59,11 @@ class User extends Authenticatable
     public function depositCoin(Coin $coin): bool
     {
         return $this->increment('deposit', $coin->value);
+    }
+
+    public function resetDeposit(): bool
+    {
+        $this->deposit = 0;
+        return $this->save();
     }
 }

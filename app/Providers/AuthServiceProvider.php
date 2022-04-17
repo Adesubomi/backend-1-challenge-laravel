@@ -29,5 +29,9 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('deposit', function (User $user) {
             return Role::Buyer->match($user->role);
         });
+
+        Gate::define('reset', function (User $user) {
+            return Role::Buyer->match($user->role);
+        });
     }
 }

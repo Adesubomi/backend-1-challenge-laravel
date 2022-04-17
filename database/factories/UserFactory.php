@@ -29,10 +29,17 @@ class UserFactory extends Factory
         ];
     }
 
-    public function role(Role $role)
+    public function role(Role $role): UserFactory
     {
         return $this->state([
             'role' => $role,
+        ]);
+    }
+
+    public function fund(int $amount = null): UserFactory
+    {
+        return $this->state([
+            'deposit' => $amount ?? rand(2,40) * 5
         ]);
     }
 }

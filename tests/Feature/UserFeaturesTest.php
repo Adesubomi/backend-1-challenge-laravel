@@ -194,4 +194,50 @@ class UserFeaturesTest extends TestCase
         ]);
         $response->assertJsonValidationErrors(['coin']);
     }
+
+    /**
+     * @test
+     */
+    public function user_can_reset_coin_deposit(): void
+    {
+        $user = User::factory()
+            ->role(Role::Buyer)
+            ->fund()
+            ->create();
+
+        $endpoint = route('api.reset');
+        Sanctum::actingAs($user);
+        $response = $this->putJson($endpoint);
+        $response->assertSuccessful();
+        $response->assertJsonStructure([
+            'message', 'data'
+        ]);
+
+        $this->assertDatabaseHas(
+            (new User)->getTable(),
+            ["id" => $user->id, "deposit" => 0]
+        );
+    }
+
+    /**
+     * @test
+     */
+    public function only_buyers_can_reset_coin_deposit(): void
+    {
+        $user = User::factory()
+            ->role(Role::Seller)
+            ->fund()
+            ->create();
+        $current_balance = $user->deposit;
+
+        $endpoint = route('api.reset');
+        Sanctum::actingAs($user);
+        $response = $this->putJson($endpoint);
+        $response->assertForbidden();
+
+        $this->assertDatabaseHas(
+            (new User)->getTable(),
+            ["id" => $user->id, "deposit" => $current_balance]
+        );
+    }
 }

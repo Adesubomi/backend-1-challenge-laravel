@@ -58,6 +58,35 @@ class UserController extends Controller
     }
 
     /**
+     * Reset coin deposit balance
+     */
+    public function reset(): JsonResponse
+    {
+        if (!Gate::allows('reset')) {
+            return response()->failed(
+                message: "Only a buyer is allowed to reset coin deposit",
+                statusCode: 403,
+                data: [],
+            );
+        }
+
+        /** @var User $user */
+        $user = Auth::user();
+        $is_reset = $user->resetDeposit();
+
+        if (!$is_reset) {
+            return response()->failed(
+                "Unable to reset coin deposit",
+            );
+        }
+
+        return response()->success(
+            message: "Coin deposit has been reset",
+            data: []
+        );
+    }
+
+    /**
      * Profile of authenticated user
      */
     public function profile(): JsonResponse
